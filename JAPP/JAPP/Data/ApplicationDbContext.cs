@@ -10,4 +10,5 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public required DbSet<Exercise> Exercise { get; set; }
     public required DbSet<Workout> Workout { get; set; }
     public required DbSet<Distance> Distance { get; set; }
+    //jhgjkhg
 }
