@@ -1,6 +1,6 @@
 .myNav {
     background-color: var(--nav-background);
-    border-radius: var(--size-radius);
+    /*border-radius: var(--size-radius);*/
     max-width: var(--container-width);
     box-shadow: 0 1px 4px 1px rgba(0,0,0,.25);
     width: 80%;
@@ -27,7 +27,7 @@
         width: 100%;
     }
 
-    .nav-item ::deep a.active {       
+    .nav-item ::deep a.active {
         color: var(--color-signal);
     }
 
@@ -47,7 +47,6 @@
     .nav-scrollable {
         /* Never collapse the sidebar for wide screens */
         display: block;
-
         /* Allow sidebar to scroll for tall menus */
         height: calc(100vh - 3.5rem);
         overflow-y: auto;

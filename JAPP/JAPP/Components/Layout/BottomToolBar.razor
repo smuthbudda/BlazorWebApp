@@ -1,59 +1,61 @@
-﻿@inherits LayoutComponentBase
+﻿@using Microsoft.FluentUI.AspNetCore.Components
+
+@inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 
 <style>
     .toolbar {
-    position: fixed;
-    bottom: 100px;
-    font-weight: 500;
-    display: flex;
-    flex-direction: column;
-    gap: 3rem;
-}
-
-    .toolbar.right {
-        left: 50px;
-        width: 0;
+        position: fixed;
+        bottom: 100px;
+        font-weight: 500;
         display: flex;
         flex-direction: column;
         gap: 3rem;
     }
 
-.toolbar__icons {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-bottom: -140px;
-    transform:translateX(-1rem);
-}
+        .toolbar.right {
+            left: 50px;
+            width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+        }
 
-    .toolbar__icons > *:hover {
-        color: var(--color-signal);
-        transition: all 0.2s ease-in-out;
-        transform: scale(1.2);
+    .toolbar__icons {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: -140px;
+        transform: translateX(-1rem);
     }
 
-    .toolbar__icons > * {
-        transition: all 0.2s ease-in-out;
-        color: var(--color-text);
-    }
+        .toolbar__icons > *:hover {
+            color: var(--color-signal);
+            transition: all 0.2s ease-in-out;
+            transform: scale(1.2);
+        }
 
-.toolbar::after {
-    content: "";
-    display: block;
-    width: 2px;
-    height: 100px;
-    margin: 0px auto;
-    background-color: var(--color-text);
-    position: relative;
-    bottom: -160px;
-}
-
-@@media(max-width: 800px) {
-    .toolbar {
-        display: none;
+        .toolbar__icons > * {
+            transition: all 0.2s ease-in-out;
+            color: var(--color-text);
+        }
+    /*
+                .toolbar::after {
+                    content: "";
+                    display: block;
+                    width: 2px;
+                    height: 100px;
+                    margin: 0px auto;
+                    background-color: var(--color-text);
+                    position: relative;
+                    bottom: -160px;
+                }
+                 */
+    @@media(max-width: 800px) {
+        .toolbar {
+            display: none;
+        }
     }
-}
 
 </style>
 
@@ -65,19 +67,22 @@
                     <AntiforgeryToken />
                     <input type="hidden" name="ReturnUrl" value="@currentUrl" />
                     <button type="submit" class="" style="all: unset; cursor: pointer">
-                        Logout
+                        <FluentIcon Value="@(new Icons.Regular.Size24.PersonDelete())" />
                     </button>
                 </form>
                 <div class="">
-                    <a href="Account/Manage">@context.User.Identity?.Name</a>
+                    <a href="Account/Manage">
+                        @* @context.User.Identity?.Name *@
+                        <FluentIcon Value="@(new Icons.Regular.Size24.Settings())" />
+                    </a>
                 </div>
             </Authorized>
             <NotAuthorized>
                 <a href="Account/Login" class="">
-                    Login
+                    <FluentIcon Value="@(new Icons.Regular.Size24.PersonArrowRight())" />
                 </a>
                 <a href="Account/Register" class="">
-                    Register
+                    <FluentIcon Value="@(new Icons.Regular.Size24.Add())" />
                 </a>
             </NotAuthorized>
         </AuthorizeView>
