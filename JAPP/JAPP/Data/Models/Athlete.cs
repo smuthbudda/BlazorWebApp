@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using JAPP.Data;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace MinAPI.Database.Models
@@ -27,5 +28,7 @@ namespace MinAPI.Database.Models
         
         [Required]
         public DateOnly BirthDate { get; set; }
+
+        public virtual ApplicationUser User { get; set; } = default!;
     }
 }

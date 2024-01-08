@@ -2,6 +2,7 @@
 
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.FluentUI.AspNetCore.Components
 @using JAPP.Data
 
 @inject UserManager<ApplicationUser> UserManager
@@ -28,6 +29,11 @@
                 <label for="phone-number" class="form-label">Phone number</label>
                 <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
             </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="@Input.Birthday" class="form-control" placeholder="Please enter your Birthday" />
+                <label for="birth-day" class="form-label">Birth Date</label>
+                <ValidationMessage For="() => Input.Birthday" class="text-danger" />
+            </div>
             <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
         </EditForm>
     </div>
@@ -37,6 +43,7 @@
     private ApplicationUser user = default!;
     private string? username;
     private string? phoneNumber;
+    private string? birthDay;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
@@ -44,12 +51,16 @@
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
 
+    [Inject]
+    private ApplicationDbContext _dbContext { get; set; } = default!;
+
     protected override async Task OnInitializedAsync()
     {
         user = await UserAccessor.GetRequiredUserAsync(HttpContext);
         username = await UserManager.GetUserNameAsync(user);
         phoneNumber = await UserManager.GetPhoneNumberAsync(user);
-
+        birthDay = user.BirthDate.ToString();
+        Input.Birthday = user.BirthDate.ToString();
         Input.PhoneNumber ??= phoneNumber;
     }
 
@@ -64,8 +75,25 @@
             }
         }
 
+        // if (Input.Birthday != birthDay)       
+            await UpdateBirthDay();
+        
+
         await SignInManager.RefreshSignInAsync(user);
         RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
+    }
+
+    private async Task UpdateBirthDay()
+    {
+
+        if (await _dbContext.Users.FindAsync(user.Id) is ApplicationUser userDetails)
+        {
+            if (Input.Birthday is null)
+                return;
+            
+            userDetails.BirthDate = DateOnly.Parse(Input.Birthday);
+            _dbContext.SaveChanges();
+        }
     }
 
     private sealed class InputModel
@@ -73,5 +101,8 @@
         [Phone]
         [Display(Name = "Phone number")]
         public string? PhoneNumber { get; set; }
+
+        [Display(Name = "Birth Date")]
+        public string? Birthday { get; set; }
     }
 }
