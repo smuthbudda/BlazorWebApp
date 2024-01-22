@@ -1,19 +1,98 @@
-﻿@page "/counter"
-@rendermode InteractiveAuto
+﻿@page "/split-timer"
+@rendermode InteractiveWebAssembly
+@using FFmpegBlazor
+@inject IJSRuntime Runtime
+@using Microsoft.AspNetCore.Components.Forms
 
-<PageTitle>Counter</PageTitle>
 
-<h1>Counter</h1>
 
-<p role="status">Current count: @currentCount</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<section class="container-md d-flex justify-content-center flex-column w-50 mt-4 p-4 gap-3">
+    <div>
+        <InputFile OnChange="fileLoad" />
+    </div>
+    <div>
+        @if (!string.IsNullOrEmpty(url))
+        {
+            <video width="300" height="200" autoplay controls src="@url" />
+        }
+    </div>
+    <div>
+        <button class="btn btn-primary" @onclick="Process">Process Video</button>
+    </div>
+</section>
 
-@code {
-    private int currentCount = 0;
+@code
+{
+    string? url;
+    string? url2;
+    FFMPEG ff = default!;
+    byte[]? buffer;
 
-    private void IncrementCount()
+    //must use onafterrender because of the javascript interop
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        currentCount++;
+        if (firstRender)
+        {
+            if (FFmpegFactory.Runtime == null)
+            {
+                FFmpegFactory.Logger += WriteLogs;
+                FFmpegFactory.Progress += ProgressChange;
+            }
+            await FFmpegFactory.Init(Runtime);
+        }
+    }
+
+    async void fileLoad(InputFileChangeEventArgs v)
+    {
+        var file = v.GetMultipleFiles()[0];
+        int maxFileSize = 1024 * 1024 * 100; //100mb
+        using var stream = file.OpenReadStream(maxFileSize); //Max size for file that can be read
+        buffer = new byte[file.Size];
+        await stream.ReadAsync(buffer);
+        url = FFmpegFactory.CreateURLFromBuffer(buffer, "myFile.mp4", file.ContentType);
+        StateHasChanged();
+    }
+
+    async void Process()
+    {
+        ff = FFmpegFactory.CreateFFmpeg(new FFmpegConfig() { Log = true });
+
+        //download all dependencies from cdn
+        await ff.Load();
+
+        if (!ff.IsLoaded) return;
+
+        //write buffer to in-memory files (special emscripten files, Ffmpeg only interact with this file)
+        ff.WriteFile("myFile.mp4", buffer);
+
+        //Pass CLI argument here equivalent to ffmpeg -i myFile.mp4 output.mp3
+        await ff.Run("-i", "myFile.mp4", "output.mp3");
+
+        ff.UnlinkFile("myFile.mp4");
+    }
+
+    async void ProgressChange(Progress m)
+    {
+        // display progress % (0-1)
+        Console.WriteLine($"Progress {m.Ratio}");
+
+        //if ffmpeg processing is complete (generate a media URL so that it can be played or alternatively download that file)
+        if (m.Ratio == 1)
+        {
+            //get bytepointer from c wasm to c#
+            var res = await ff.ReadFile("output.mp3");
+
+
+            //generate a url from file bufferPointer
+            url2 = FFmpegFactory.CreateURLFromBuffer(res, "output.mp3", "audio/mp3");
+
+            StateHasChanged();
+        }
+    }
+
+    void WriteLogs(Logs m)
+    {
+        Console.WriteLine(m.Type + " " + m.Message);
     }
 }
