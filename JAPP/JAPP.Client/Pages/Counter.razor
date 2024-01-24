@@ -67,7 +67,7 @@
         ff.WriteFile("myFile.mp4", buffer);
 
         //Pass CLI argument here equivalent to ffmpeg -i myFile.mp4 output.mp3
-        await ff.Run("-i", "myFile.mp4", "output.mp3");
+        await ff.Run("-i", "myFile.mp4", "output_%04d.png");
 
         ff.UnlinkFile("myFile.mp4");
     }
