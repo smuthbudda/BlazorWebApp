@@ -1,8 +1,7 @@
 Entity Framework: 
 
-Create Migration: dotnet ef migrations add InitialCreate
-CreateDB: dotnet ef database update
+	Create Migration: Add-Migration InitialCreate
 
 
-New Migration: dotnet ef migrations add AddBlogCreatedTimestamp
-Update DB: dotnet ef database update
+	New Migration: Add-Migration AddBlogCreatedTimestamp
+	Update DB: Update-Database

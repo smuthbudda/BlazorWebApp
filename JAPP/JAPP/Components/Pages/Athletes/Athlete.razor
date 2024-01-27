@@ -1,0 +1,126 @@
+﻿@page "/Athlete"
+@rendermode InteractiveServer
+@    using MinAPI.Database.Models
+@    using Microsoft.FluentUI.AspNetCore.Components
+
+@inject IAthleteRepository _athleteRepository
+
+<section class="container mt-3 text-center ">
+
+    <h3>Athlete</h3>
+
+
+    <FluentTabs @bind-ActiveTabId="@activeid">
+
+        <FluentTab Id="tab-1" Label="Athletes">
+            @if (isLoading)
+            {
+                <FluentSkeleton Shape="SkeletonShape.Circle"></FluentSkeleton>
+                <FluentSkeleton Style="margin-top: 10px" Height="10px;"></FluentSkeleton>
+                <FluentSkeleton Style="margin-top: 10px" Height="10px;"></FluentSkeleton>
+                <FluentSkeleton Style="margin-top: 10px" Height="10px;"></FluentSkeleton>
+                <FluentSkeleton Style="margin-top: 20px;margin-bottom: 10px;" Width="75px" Height="30px"></FluentSkeleton>
+            }
+            else
+            {
+                @if (AthleteList is not null)
+                {
+                    <div class="athlete_container">
+
+                        @foreach (var athlete in AthleteList)
+                        {
+                            <FluentCard Width="300px" Height="400px">
+                                <div>@athlete.FirstName </div>
+                                <div>@athlete.LastName </div>
+                                <div>@athlete.BirthDate </div>
+                                <div>@athlete.IsActive </div>
+                                <FluentIcon Value="@(new Icons.Regular.Size24.Delete())" OnClick=@(()=> Remove(athlete.ID)) />
+                            </FluentCard>
+                        }
+                    </div>
+                }
+            }
+        </FluentTab>
+        <FluentTab Label="New" Icon="@(new Icons.Regular.Size24.LeafOne())" Id="tab-2" >
+            <FluentCard Width="300px" Height="400px">
+                <EditForm Model="@NewAthlete" OnValidSubmit="@InsertNewAthlete" FormName="starship_fluent_entry">
+                    <DataAnnotationsValidator />
+                    <FluentValidationSummary />
+                    <h3>Insert New Athlete</h3>
+                    <div class="d-flex flex-column align-items-center gap-2 mt-4">
+                        <div>
+                            <FluentDatePicker Name="producion_date" @bind-Value=@NewAthlete.BirthDate Label="Birth Day" Style="z-index: 100" />
+                        </div>
+                        <div>
+                            <FluentTextField Name="first" @bind-Value="NewAthlete.FirstName" Label="First Name" Required />
+                             <FluentValidationMessage For="@(() => NewAthlete.FirstName)" />
+                         </div>
+                         <div>
+                             <FluentTextField Name="last" @bind-Value="NewAthlete.LastName" Label="Last Name" Required />
+                             <FluentValidationMessage For="@(() => NewAthlete.LastName)" />
+                         </div>
+                         <div>
+                             <FluentCheckbox Name="producion_date" Value="NewAthlete.IsActive" Label="Active" />
+                         </div>
+                     </div>
+                     <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" IconStart="@(new Icons.Regular.Size16.Add())" Class="m-4">Submit</FluentButton>
+                 </EditForm>
+             </FluentCard>
+         </FluentTab>
+     </FluentTabs>
+
+ </section>
+
+
+
+ @code {
+    [SupplyParameterFromForm]
+    private AthleteModel NewAthlete { get; set; } = new();
+
+    public IEnumerable<AthleteModel>? AthleteList;
+    public bool isLoading = true;
+    public bool isBusy = true;
+    string? activeid = "tab-1";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetAthletes();
+    }
+
+    public async Task Remove(Guid id)
+    {
+        await _athleteRepository.DeleteAthlete(id);
+        await GetAthletes();
+        StateHasChanged();
+    }
+
+    public async Task GetAthletes()
+    {
+        isLoading = true;
+        AthleteList = await _athleteRepository.GetAthletes(null);
+        isLoading = false;
+    }
+
+    public async Task InsertNewAthlete()
+    {
+        try
+        {
+            await _athleteRepository.InsertAthlete(NewAthlete);
+            await GetAthletes();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+
+        }
+    }
+
+}
+
+<style>
+    .athlete_container {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        gap: 2rem;
+    }
+</style>

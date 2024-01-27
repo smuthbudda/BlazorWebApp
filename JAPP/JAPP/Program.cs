@@ -2,6 +2,8 @@ using JAPP.Client.Pages;
 using JAPP.Components;
 using JAPP.Components.Account;
 using JAPP.Data;
+using JAPP.Data.Repositories.Athlete;
+using JAPP.MinimalAPI.Test;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +39,9 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddFluentUIComponents();
+
+builder.Services.AddScoped<IAthleteRepository, AthleteRepository>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -64,5 +69,11 @@ app.MapRazorComponents<App>()
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
+app.MapTestEndpoints();
+
+
+//Minimal API
+app.MapGet("/SayHi", () => "Hallo there");
+
 
 app.Run();

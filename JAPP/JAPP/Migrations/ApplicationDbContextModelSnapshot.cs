@@ -214,35 +214,32 @@ namespace JAPP.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("MinAPI.Database.Models.Athlete", b =>
+            modelBuilder.Entity("MinAPI.Database.Models.AthleteModel", b =>
                 {
                     b.Property<Guid>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<DateOnly>("BirthDate")
-                        .HasColumnType("date");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<DateTime>("BirthDate")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("PasswordSalt")
-                        .HasColumnType("longtext");
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Athlete");
                 });
@@ -372,6 +369,15 @@ namespace JAPP.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MinAPI.Database.Models.AthleteModel", b =>
+                {
+                    b.HasOne("JAPP.Data.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MinAPI.Database.Models.Distance", b =>
                 {
                     b.HasOne("MinAPI.Database.Models.Exercise", "Exercise")
@@ -385,7 +391,7 @@ namespace JAPP.Migrations
 
             modelBuilder.Entity("MinAPI.Database.Models.Exercise", b =>
                 {
-                    b.HasOne("MinAPI.Database.Models.Athlete", "Athlete")
+                    b.HasOne("MinAPI.Database.Models.AthleteModel", "Athlete")
                         .WithMany()
                         .HasForeignKey("AthleteID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -400,7 +406,7 @@ namespace JAPP.Migrations
 
             modelBuilder.Entity("MinAPI.Database.Models.Workout", b =>
                 {
-                    b.HasOne("MinAPI.Database.Models.Athlete", "Athlete")
+                    b.HasOne("MinAPI.Database.Models.AthleteModel", "Athlete")
                         .WithMany()
                         .HasForeignKey("AthleteID")
                         .OnDelete(DeleteBehavior.Cascade)
